@@ -1,38 +1,31 @@
-name: CI/CD
 
 on:
   push:
     branches:
-      - main
-      
+    - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install Tailscale
+      run: |
+        curl -fsSL https://tailscale.com/install.sh | sh
+    - name: Connect to Tailscale
+      run: |
+        sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTHKEY }}
+    - name: Set up SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+    - name: Pull changes and build on remote server
+      run: |
+        ssh -p 2222 -vvv ${{secrets.USER}}@${{secrets.HOST}} "./nginxssl.sh"
 
-      - name: Install Tailscale
-        run: |
-          curl -fsSL https://tailscale.com/install.sh | sh
-
-      - name: Connect TailScale
-        run: |
-          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }}
-
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            cd ${{ secrets.PATH }}
-            git pull
-            npm run build
-            sudo systemctl reload nginx
-      - name: Disconnect TailScale
-        run: |
-          sudo tailscale logout
+    - name: Disconnect TailScale
+      run: |
+        sudo tailscale logout
