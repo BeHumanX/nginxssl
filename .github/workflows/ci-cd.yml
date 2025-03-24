@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-
+      
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,7 +19,7 @@ jobs:
 
       - name: Connect TailScale
         run: |
-          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} 
+          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }}
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
