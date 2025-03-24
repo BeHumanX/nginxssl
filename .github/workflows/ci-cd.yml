@@ -24,7 +24,7 @@ jobs:
         echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
     - name: Pull changes and build on remote server
       run: |
-        ssh -p 2222 -vvv ${{secrets.USER}}@${{secrets.HOST}} "./nginxssl.sh"
+        ssh -p 2222 -vvv ${{secrets.USERNAME}}@${{secrets.HOST}} "./nginxssl.sh"
 
     - name: Disconnect TailScale
       run: |
